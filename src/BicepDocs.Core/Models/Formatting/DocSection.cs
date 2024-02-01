@@ -10,4 +10,5 @@ public enum DocSection
     Resources = 5,
     Outputs = 6,
     ReferencedResources = 7,
+    UserDefinedTypes = 8
 }

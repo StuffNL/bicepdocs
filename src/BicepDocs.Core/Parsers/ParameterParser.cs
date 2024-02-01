@@ -26,15 +26,25 @@ public static class ParameterParser
             var paramType = templateParameter.Value.TypeReference.Type.Name;
             var allowList = paramType.Split('\'').Select(x => x.Trim()).Where(x => x.Length > 1).ToArray();
             var allowValues = allowList.Select(x => x.Replace("'", "")).Where(x => !string.IsNullOrEmpty(x)).ToList();
-            parameter.IsComplexAllow = allowList.Length > 2;
-            parameter.AllowedValues = allowValues;
+
 
             var symbol = GetParameterSymbol(model, templateParameter.Key);
+
+
             if (symbol == null)
             {
                 parameters.Add(parameter);
                 continue;
             }
+
+            parameter.Type = (symbol.DeclaringParameter.Type as VariableAccessSyntax)?.Name.IdentifierName ??
+                             templateParameter.Value.TypeReference.Type.Name;
+
+            parameter.Debug = (symbol.DeclaringParameter.Type as VariableAccessSyntax)?.Name.IdentifierName;
+
+            parameter.IsUserDefinedType = model.Root.TypeDeclarations.Any(x => x.Name == parameter.Type);
+            parameter.IsComplexAllow = allowList.Length > 2 && !parameter.IsUserDefinedType;
+            parameter.AllowedValues = allowValues;
 
             parameter.MaxLength = GetDecorator(symbol, LanguageConstants.ParameterMaxLengthPropertyName);
             parameter.MinLength = GetDecorator(symbol, LanguageConstants.ParameterMinLengthPropertyName);
@@ -62,6 +72,9 @@ public static class ParameterParser
                     _ => false
                 };
             }
+
+           
+            model.Root.TypeDeclarations.Any(x => x.Name == templateParameter.Value.TypeReference.Type.Name);
 
 
             parameters.Add(parameter);

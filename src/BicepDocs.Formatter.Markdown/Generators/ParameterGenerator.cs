@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using Azure.Deployments.Core.Definitions.Schema;
 using LandingZones.Tools.BicepDocs.Core.Models.Formatting;
 using LandingZones.Tools.BicepDocs.Core.Models.Parsing;
 using LandingZones.Tools.BicepDocs.Formatter.Markdown.Elements;
@@ -16,8 +17,12 @@ internal static class ParameterGenerator
         document.Append(new MkHeader("Parameters", MkHeaderLevel.H2));
         var paramOverviewTable = new MkTable().AddColumn("Parameter").AddColumn("Description").AddColumn("Type")
             .AddColumn("Default");
+
+        
+
         foreach (var tp in parameters.OrderBy(x => x.Name))
         {
+            //document.Append(new MkHeader($"IsUserDefinedType {tp.Debug} {tp.IsUserDefinedType}", MkHeaderLevel.H2));
             var type = BuildType(tp);
             var dfValue = GetParameterDefault(tp);
 
@@ -80,9 +85,9 @@ internal static class ParameterGenerator
     {
         var type = string.Empty;
 
-        if (parameter.IsComplexAllow)
+        if (parameter.IsUserDefinedType)
         {
-            type += new MkAnchor($"{parameter.Name}Allow", $"#{parameter.Name}Allow".ToLower()).ToMarkdown();
+            type += new MkAnchor($"{parameter.Type}", $"#{parameter.Type}".ToLower()).ToMarkdown();
             if (parameter.Secure)
             {
                 type += " (secure)";
@@ -93,6 +98,7 @@ internal static class ParameterGenerator
             type += parameter.Type.Replace("|", "\\|");
             if (parameter.Secure) type += " (secure)";
         }
+
 
 
         var minMax = GetCharacterLimit(parameter);
@@ -106,8 +112,9 @@ internal static class ParameterGenerator
         if (value != null)
         {
             type += " <br/> <br/>";
-            type += $"Accepted values: {value}";;
+            type += $"Accepted values: {value}"; ;
         }
+        
 
         return type;
     }

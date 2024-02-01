@@ -1,6 +1,9 @@
+﻿using Bicep.Core.Syntax;
+
 namespace LandingZones.Tools.BicepDocs.Core.Models.Parsing;
 
-public record ParsedParameter(string Name, string Type)
+
+public record ParsedUserDefinedTypeProperty(string Name, string Type)
 {
     public string Name { get; set; } = Name;
     public string Type { get; set; } = Type;
@@ -18,11 +21,6 @@ public record ParsedParameter(string Name, string Type)
     public int? MaxLength { get; set; }
 
     public int? MaxValue { get; set; }
-    
+
     public bool Secure { get; set; }
-
-    public bool IsUserDefinedType { get; set; }
-
-    public string Debug { get; set; }
-
 }

@@ -26,6 +26,7 @@ public class MarkdownDocsFormatter : IDocsFormatter
         var markdownDocument = new MarkdownDocument();
         var metadata = MetadataParser.GetMetadata(context.Template, context.FormatterOptions.MetaKeyword);
         var parameters = ParameterParser.ParseParameters(context.Template);
+        var userTypes = UserDefinedTypeParser.ParseUserDefinedTypes(context.Template);
         var configuration =
             _configurationLoader.GetFormatterOptionsOrDefault<MarkdownOptions>(context.FormatterOptions, Formatter);
 
@@ -62,6 +63,9 @@ public class MarkdownDocsFormatter : IDocsFormatter
                     break;
                 case DocSection.ReferencedResources:
                     ResourceGenerator.BuildReferencedResources(markdownDocument, context);
+                    break;
+                case DocSection.UserDefinedTypes:
+                    UserDefinedTypeGenerator.BuildUserDefinedTypes(markdownDocument, context);
                     break;
             }
         }

@@ -23,6 +23,7 @@ public class FormatterOptions
         DocSection.Description,
         DocSection.Usage,
         DocSection.Parameters,
+        DocSection.UserDefinedTypes,
         DocSection.ReferencedResources,
         DocSection.Resources,
         DocSection.Outputs,
