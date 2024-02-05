@@ -27,9 +27,10 @@ public static class ParameterParser
             var allowList = paramType.Split('\'').Select(x => x.Trim()).Where(x => x.Length > 1).ToArray();
             var allowValues = allowList.Select(x => x.Replace("'", "")).Where(x => !string.IsNullOrEmpty(x)).ToList();
 
-
             var symbol = GetParameterSymbol(model, templateParameter.Key);
 
+            parameter.IsComplexAllow = allowList.Length > 2;
+            parameter.AllowedValues = allowValues;
 
             if (symbol == null)
             {
@@ -37,15 +38,15 @@ public static class ParameterParser
                 continue;
             }
 
-            parameter.Type = (symbol.DeclaringParameter.Type as VariableAccessSyntax)?.Name.IdentifierName ??
-                             templateParameter.Value.TypeReference.Type.Name;
+            if (!parameter.IsComplexAllow)
+            {
+                parameter.Type = (symbol.DeclaringParameter.Type as VariableAccessSyntax)?.Name.IdentifierName ??
+                                 templateParameter.Value.TypeReference.Type.Name;
+            }
 
-            parameter.Debug = (symbol.DeclaringParameter.Type as VariableAccessSyntax)?.Name.IdentifierName;
+            //parameter.Raw = (symbol.DeclaringParameter.Type as VariableAccessSyntax)?.Name.IdentifierName;
 
             parameter.IsUserDefinedType = model.Root.TypeDeclarations.Any(x => x.Name == parameter.Type);
-            parameter.IsComplexAllow = allowList.Length > 2 && !parameter.IsUserDefinedType;
-            parameter.AllowedValues = allowValues;
-
             parameter.MaxLength = GetDecorator(symbol, LanguageConstants.ParameterMaxLengthPropertyName);
             parameter.MinLength = GetDecorator(symbol, LanguageConstants.ParameterMinLengthPropertyName);
             parameter.Secure = HasDecorator(symbol, LanguageConstants.ParameterSecurePropertyName);
@@ -73,7 +74,7 @@ public static class ParameterParser
                 };
             }
 
-           
+
             model.Root.TypeDeclarations.Any(x => x.Name == templateParameter.Value.TypeReference.Type.Name);
 
 

@@ -3,17 +3,14 @@
 namespace LandingZones.Tools.BicepDocs.Core.Models.Parsing;
 
 
-public record ParsedUserDefinedTypeProperty(string Name, string Type)
+public record ParsedUserDefinedTypeProperty(string Name)
 {
     public string Name { get; set; } = Name;
-    public string Type { get; set; } = Type;
+    public string Type { get; set; }
     public string? Description { get; set; }
-    public string? DefaultValue { get; set; }
     public bool IsComplexDefault { get; set; }
     public List<string>? AllowedValues { get; set; }
     public bool IsComplexAllow { get; set; }
-    public bool IsInterpolated { get; set; }
-
     public int? MinLength { get; set; }
 
     public int? MinValue { get; set; }

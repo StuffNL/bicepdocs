@@ -18,11 +18,9 @@ internal static class ParameterGenerator
         var paramOverviewTable = new MkTable().AddColumn("Parameter").AddColumn("Description").AddColumn("Type")
             .AddColumn("Default");
 
-        
 
         foreach (var tp in parameters.OrderBy(x => x.Name))
         {
-            //document.Append(new MkHeader($"IsUserDefinedType {tp.Debug} {tp.IsUserDefinedType}", MkHeaderLevel.H2));
             var type = BuildType(tp);
             var dfValue = GetParameterDefault(tp);
 
@@ -84,22 +82,21 @@ internal static class ParameterGenerator
     private static string BuildType(ParsedParameter parameter)
     {
         var type = string.Empty;
-
-        if (parameter.IsUserDefinedType)
+        if (parameter.IsComplexAllow)
+        {
+            type += new MkAnchor($"{parameter.Name}Allow", $"#{parameter.Name}Allow".ToLower()).ToMarkdown();
+        }
+        else if (parameter.IsUserDefinedType)
         {
             type += new MkAnchor($"{parameter.Type}", $"#{parameter.Type}".ToLower()).ToMarkdown();
-            if (parameter.Secure)
-            {
-                type += " (secure)";
-            }
         }
         else
         {
             type += parameter.Type.Replace("|", "\\|");
-            if (parameter.Secure) type += " (secure)";
+
         }
 
-
+        if (parameter.Secure) type += " (secure)";
 
         var minMax = GetCharacterLimit(parameter);
         if (minMax != null)
@@ -114,7 +111,7 @@ internal static class ParameterGenerator
             type += " <br/> <br/>";
             type += $"Accepted values: {value}"; ;
         }
-        
+
 
         return type;
     }

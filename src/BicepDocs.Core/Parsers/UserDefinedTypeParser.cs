@@ -1,4 +1,7 @@
 ﻿using System.Collections.Immutable;
+using System.DirectoryServices.ActiveDirectory;
+using Azure.Deployments.Core.Definitions.Schema;
+using System.Reflection.Metadata;
 using Bicep.Core;
 using Bicep.Core.Navigation;
 using Bicep.Core.Semantics;
@@ -19,56 +22,66 @@ public static class UserDefinedTypeParser
             var userDefinedType = new ParsedUserDefinedType
             (
                 Name: typeDeclaration.Name,
-                Properties: ParseProperties(model, typeDeclaration.Type.Name)
+                Properties: ParseProperties(model, typeDeclaration.Value as ObjectTypeSyntax)
             );
-
             userDefinedTypes.Add(userDefinedType);
+
+            var symbol = GetUserDefinedTypeSymbol(model, typeDeclaration.Name);
+            
+            if (symbol != null)
+            {
+                userDefinedType.Description = GetStringDecorator(typeDeclaration, LanguageConstants.MetadataDescriptionPropertyName) ?? "";
+            }
+
+
         }
 
         return userDefinedTypes.ToImmutableList();
     }
 
-    private static List<ParsedUserDefinedTypeProperty> ParseProperties(SemanticModel model, string properties)
+    private static List<ParsedUserDefinedTypeProperty> ParseProperties(SemanticModel model, ObjectTypeSyntax properties)
     {
-        //TODO: replace with REGEX
-        properties = properties.Replace(@"Type<{", "").Replace(@"Type<", "").Replace(@"}>", "").Replace("'","").Replace(">","").Trim();
+        
         var parsedUserDefinedTypeProperties = new List<ParsedUserDefinedTypeProperty>();
 
-        foreach (var property in properties.Split(','))
+        foreach (var property in properties.Properties)
         {
-            var propertyName = property.Split(':').First();
-            var propertyType = property.Split(':').Last();
-            var userDefinedTypeProperty = new ParsedUserDefinedTypeProperty(propertyName, propertyType);
+            var propertyName = property.Key.ToText();
 
-            var allowList = propertyType.Split('|').Select(x => x.Trim()).Where(x => x.Length > 1).ToArray();
-            var allowValues = allowList.Select(x => x.Replace("'", "")).Where(x => !string.IsNullOrEmpty(x)).ToList();
-            userDefinedTypeProperty.IsComplexAllow = allowList.Length > 2;
-            userDefinedTypeProperty.AllowedValues = allowValues;
+            var userDefinedTypeProperty = new ParsedUserDefinedTypeProperty(propertyName);
 
-            var symbol = GetUserDefinedTypeSymbol(model, propertyType);
-            if (symbol == null)
+            if (property.Value is UnionTypeSyntax unionType)
             {
-                parsedUserDefinedTypeProperties.Add(userDefinedTypeProperty);
-                continue;
+                userDefinedTypeProperty.Type = unionType.ToText();
+
+                var allowList = unionType.Members.Select(x => x.Value.ToText()).ToArray();
+                var allowValues = allowList.Select(x => x.Replace("'", "")).Where(x => !string.IsNullOrEmpty(x)).ToList();
+                userDefinedTypeProperty.IsComplexAllow = allowList.Length > 2;
+                userDefinedTypeProperty.AllowedValues = allowValues;
+
+            }
+            else if (property.Value is VariableAccessSyntax variableAccessSyntax)
+            {
+                userDefinedTypeProperty.Type = variableAccessSyntax.Name.IdentifierName;
             }
 
-            userDefinedTypeProperty.Description =
-                GetStringDecorator(symbol, LanguageConstants.MetadataDescriptionPropertyName);
-            userDefinedTypeProperty.MaxLength = GetDecorator(symbol, LanguageConstants.ParameterMaxLengthPropertyName);
-            userDefinedTypeProperty.MinLength = GetDecorator(symbol, LanguageConstants.ParameterMinLengthPropertyName);
-            userDefinedTypeProperty.Secure = HasDecorator(symbol, LanguageConstants.ParameterSecurePropertyName);
-            userDefinedTypeProperty.MinValue = GetDecorator(symbol, LanguageConstants.ParameterMinValuePropertyName);
-            userDefinedTypeProperty.MaxValue = GetDecorator(symbol, LanguageConstants.ParameterMaxValuePropertyName);
+            userDefinedTypeProperty.Description = GetStringDecorator(property, LanguageConstants.MetadataDescriptionPropertyName);
+            userDefinedTypeProperty.MaxLength = GetDecorator(property, LanguageConstants.ParameterMaxLengthPropertyName);
+            userDefinedTypeProperty.MinLength = GetDecorator(property, LanguageConstants.ParameterMinLengthPropertyName);
+            userDefinedTypeProperty.Secure = HasDecorator(property, LanguageConstants.ParameterSecurePropertyName);
+            userDefinedTypeProperty.MinValue = GetDecorator(property, LanguageConstants.ParameterMinValuePropertyName);
+            userDefinedTypeProperty.MaxValue = GetDecorator(property, LanguageConstants.ParameterMaxValuePropertyName);
+
+            parsedUserDefinedTypeProperties.Add(userDefinedTypeProperty);
         }
 
         return parsedUserDefinedTypeProperties;
 
     }
 
-
-    private static bool HasDecorator(TypeAliasSymbol typeSymbol, string decoratorName)
+    private static bool HasDecorator(ObjectTypePropertySyntax objectTypeProperty, string decoratorName)
     {
-        var f = typeSymbol.DeclaringType.Decorators;
+        var f = objectTypeProperty.Decorators;
         var fcs = f.FirstOrDefault(x => (x.Expression as FunctionCallSyntax)?.Name?.IdentifierName == decoratorName);
         return fcs != null;
     }
@@ -77,20 +90,32 @@ public static class UserDefinedTypeParser
         model.Root.TypeDeclarations.FirstOrDefault(x => x.Name == userDefinedTypeName);
 
 
-    private static int? GetDecorator(TypeAliasSymbol typeSymbol, string decoratorName)
+    private static TypeAliasSymbol? GetUserDefinedTypePropertySymbol(SemanticModel model, string userDefinedTypeName) =>
+        model.Root.TypeDeclarations.FirstOrDefault(x => x.Name == userDefinedTypeName);
+
+
+    private static int? GetDecorator(ObjectTypePropertySyntax objectTypeProperty, string decoratorName)
     {
-        var f = typeSymbol.DeclaringType.Decorators;
+        var f = objectTypeProperty.Decorators;
         var fcs = f.FirstOrDefault(x => (x.Expression as FunctionCallSyntax)?.Name?.IdentifierName == decoratorName);
         var literalText = (fcs?.Arguments.FirstOrDefault()?.Expression as IntegerLiteralSyntax)?.Literal?.Text;
         return int.TryParse(literalText, out var value) ? value : default(int?);
+    }
+
+    private static string? GetStringDecorator(ObjectTypePropertySyntax objectTypeProperty, string decoratorName)
+    {
+        var f = objectTypeProperty.Decorators;
+        var fcs = f.FirstOrDefault(x => (x.Expression as FunctionCallSyntax)?.Name?.IdentifierName == decoratorName);
+        var literalText = (fcs?.Arguments.FirstOrDefault()?.Expression as StringSyntax)?.SegmentValues.LastOrDefault();
+        return literalText;
     }
 
     private static string? GetStringDecorator(TypeAliasSymbol typeSymbol, string decoratorName)
     {
         var f = typeSymbol.DeclaringType.Decorators;
         var fcs = f.FirstOrDefault(x => (x.Expression as FunctionCallSyntax)?.Name?.IdentifierName == decoratorName);
-        var literalText = (fcs?.Arguments.FirstOrDefault()?.Expression as IntegerLiteralSyntax)?.Literal?.Text;
-        return literalText;
+        var literal = (fcs?.Arguments.FirstOrDefault()?.Expression as StringSyntax)?.SegmentValues.LastOrDefault();
+        return literal;
     }
 
 }

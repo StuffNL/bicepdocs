@@ -9,19 +9,21 @@ namespace LandingZones.Tools.BicepDocs.Formatter.Markdown.Generators;
 
 internal static class UserDefinedTypeGenerator
 {
-    internal static void BuildUserDefinedTypes(MarkdownDocument document, IImmutableList<ParsedUserDefinedType> types)
+    internal static void BuildUserDefinedTypes(MarkdownDocument document, IImmutableList<ParsedUserDefinedType> userDefinedTypes)
     {
         document.Append(new MkHeader("User Defined Types", MkHeaderLevel.H2));
 
-        foreach (var type in types)
+        foreach (var userDefinedType in userDefinedTypes)
         {
-            document.Append(new MkHeader(type.Name, MkHeaderLevel.H3));
-            var typeOverviewTable = new MkTable().AddColumn("Member").AddColumn("Description").AddColumn("Type")
-                .AddColumn("Default");
+            document.Append(new MkHeader(userDefinedType.Name, MkHeaderLevel.H3));
+            document.Append(new MkBlockQuote(userDefinedType.Description));
 
-            foreach (var property in type.Properties)
+            var typeOverviewTable = new MkTable().AddColumn("Property").AddColumn("Description").AddColumn("Type");
+
+            foreach (var property in userDefinedType.Properties)
             {
-                typeOverviewTable.AddRow(property.Name.WrapInBackticks(), property.Description ?? "", property.Type, property.DefaultValue);
+                var type = BuildType(property);
+                typeOverviewTable.AddRow(property.Name.WrapInBackticks(), property.Description ?? "", type);
             }
 
             document.Append(typeOverviewTable);
@@ -34,6 +36,85 @@ internal static class UserDefinedTypeGenerator
         var types = UserDefinedTypeParser.ParseUserDefinedTypes(context.Template);
         if (!types.Any()) return;
         BuildUserDefinedTypes(document, types);
+    }
+
+
+
+    private static string BuildType(ParsedUserDefinedTypeProperty property)
+    {
+        var type = string.Empty;
+
+
+        type += property.Type.Replace("|", "\\|");
+        if (property.Secure) type += " (secure)";
+
+
+        var minMax = GetCharacterLimit(property);
+        if (minMax != null)
+        {
+            type += " <br/> <br/>";
+            type += $"Character limit: {minMax}";
+        }
+
+        var value = GetAcceptedValues(property);
+        if (value != null)
+        {
+            type += " <br/> <br/>";
+            type += $"Accepted values: {value}";
+            ;
+        }
+
+
+        return type;
+    }
+
+    public static string? GetAcceptedValues(ParsedUserDefinedTypeProperty parameter)
+    {
+        if (parameter.MinValue == null && parameter.MaxValue == null)
+            return null;
+
+        if (parameter is { MinValue: { }, MaxValue: { } })
+        {
+            return $"from {parameter.MinValue} to {parameter.MaxValue}.";
+        }
+
+        if (parameter.MinValue != null)
+        {
+            return $"from {parameter.MinValue}.";
+        }
+
+        if (parameter.MaxValue != null)
+        {
+            return $"to {parameter.MaxValue}.";
+        }
+
+        return null;
+    }
+
+
+    private static string? GetCharacterLimit(ParsedUserDefinedTypeProperty parameter)
+    {
+        if (parameter.MinLength == null && parameter.MaxLength == null)
+        {
+            return null;
+        }
+
+        if (parameter is { MinLength: { }, MaxLength: { } })
+        {
+            return $"{parameter.MinLength}-{parameter.MaxLength}";
+        }
+
+        if (parameter.MinLength != null)
+        {
+            return $"{parameter.MinLength}-X";
+        }
+
+        if (parameter.MaxLength != null)
+        {
+            return $"X-{parameter.MaxLength}";
+        }
+
+        return null;
     }
 }
 
