@@ -76,4 +76,51 @@ type budgetType = {
         Assert.AreEqual("timeGrain", firstProperty.Name);
         Assert.AreEqual("'Annually' | 'BillingAnnual' | 'BillingMonth' | 'BillingQuarter' | 'Monthly' | 'Quarterly'", firstProperty.Type);
     }
+
+    [TestMethod]
+    public async Task Type_Parameter_Complex_Property_Parses()
+    {
+        const string template = @"
+type budgetType = {
+  simpleProperty: string
+  complexProperty: complexType
+}
+
+type complexType = {
+  simpleProperty: string
+}
+";
+        var semanticModel = await GetModel(template);
+        var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
+
+        var userDefinedType = userDefinedTypes.First(x => x.Name == "budgetType");
+        Assert.AreEqual("budgetType", userDefinedType.Name);
+        Assert.AreEqual("", userDefinedType.Description);
+        Assert.AreEqual(2, userDefinedType.Properties.Count);
+
+        var simpleProperty = userDefinedType.Properties.First();
+        Assert.AreEqual("simpleProperty", simpleProperty.Name);
+        Assert.AreEqual("string", simpleProperty.Type);
+
+        var complexProperty = userDefinedType.Properties.Last();
+        Assert.AreEqual("complexProperty", complexProperty.Name);
+        Assert.AreEqual("complexType", complexProperty.Type);
+    }
+
+    [TestMethod]
+    public async Task Type_No_Properties_Parser()
+    {
+        const string template = @"
+type validPrefixes = 'dev' | 'tst' | 'acc' | 'prd' | 'shared'
+type supportedLocations = 'westeurope'
+";
+        var semanticModel = await GetModel(template);
+        var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
+
+        var userDefinedType = userDefinedTypes.First(x => x.Name == "validPrefixes");
+        Assert.AreEqual("validPrefixes", userDefinedType.Name);
+        Assert.AreEqual("", userDefinedType.Description);
+        Assert.AreEqual(0, userDefinedType.Properties.Count);
+
+    }
 }

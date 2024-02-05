@@ -22,9 +22,14 @@ public static class UserDefinedTypeParser
             var userDefinedType = new ParsedUserDefinedType
             (
                 Name: typeDeclaration.Name,
-                Properties: ParseProperties(model, typeDeclaration.Value as ObjectTypeSyntax)
+                Properties: new List<ParsedUserDefinedTypeProperty>()
             );
             userDefinedTypes.Add(userDefinedType);
+
+            if (typeDeclaration.Value is ObjectTypeSyntax typeObject)
+            {
+                userDefinedType.Properties = ParseProperties(model, typeObject);
+            }
 
             var symbol = GetUserDefinedTypeSymbol(model, typeDeclaration.Name);
             
@@ -48,7 +53,7 @@ public static class UserDefinedTypeParser
         {
             var propertyName = property.Key.ToText();
 
-            var userDefinedTypeProperty = new ParsedUserDefinedTypeProperty(propertyName);
+            var userDefinedTypeProperty = new ParsedUserDefinedTypeProperty(propertyName,"");
 
             if (property.Value is UnionTypeSyntax unionType)
             {
