@@ -31,22 +31,31 @@ public static class ParameterParser
 
             parameter.IsComplexAllow = allowList.Length > 2;
             parameter.AllowedValues = allowValues;
+            parameter.Type = templateParameter.Value.TypeReference.Type.Name;
 
             if (symbol == null)
             {
                 parameters.Add(parameter);
                 continue;
             }
+   
 
-            if (!parameter.IsComplexAllow)
+            if (symbol.DeclaringParameter.Type is VariableAccessSyntax syntax)
             {
-                parameter.Type = (symbol.DeclaringParameter.Type as VariableAccessSyntax)?.Name.IdentifierName ??
-                                 templateParameter.Value.TypeReference.Type.Name;
+                parameter.IsUserDefinedType = model.Root.TypeDeclarations.Any(x => x.Name == syntax.Name.IdentifierName);
+
+                if (parameter.IsUserDefinedType)
+                {
+                    parameter.Type = syntax.Name.IdentifierName;
+                    parameter.AllowedValues = null;
+                    parameter.IsComplexAllow = false;
+                }
+            }
+            else
+            {
+                parameter.IsUserDefinedType = false;
             }
 
-            //parameter.Raw = (symbol.DeclaringParameter.Type as VariableAccessSyntax)?.Name.IdentifierName;
-
-            parameter.IsUserDefinedType = model.Root.TypeDeclarations.Any(x => x.Name == parameter.Type);
             parameter.MaxLength = GetDecorator(symbol, LanguageConstants.ParameterMaxLengthPropertyName);
             parameter.MinLength = GetDecorator(symbol, LanguageConstants.ParameterMinLengthPropertyName);
             parameter.Secure = HasDecorator(symbol, LanguageConstants.ParameterSecurePropertyName);

@@ -40,7 +40,7 @@ module exampleInstance 'br/MyRegistry:workloads/web/function-app:2022-10-29' = {
         }.ToImmutableList();
         var document = new MarkdownDocument();
 
-        UsageGenerator.BuildUsage(document, new FormatterOptions(), parameters, usageOptions, modulePath, "2022-10-29");
+        UsageGenerator.BuildUsage(document, new FormatterOptions(), parameters, ImmutableList<ParsedUserDefinedType>.Empty, usageOptions, modulePath, "2022-10-29");
 
         Assert.AreEqual(2, document.Count);
 
@@ -84,7 +84,7 @@ module exampleInstance 'br/MyRegistry:workloads/web/function-app:2022-10-29' = {
         }.ToImmutableList();
         var document = new MarkdownDocument();
 
-        UsageGenerator.BuildUsage(document, new FormatterOptions(), parameters, usageOptions, modulePath, "2022-10-29");
+        UsageGenerator.BuildUsage(document, new FormatterOptions(), parameters, ImmutableList<ParsedUserDefinedType>.Empty, usageOptions, modulePath, "2022-10-29");
 
         Assert.AreEqual(2, document.Count);
 
@@ -111,9 +111,42 @@ module exampleInstance 'br/MyRegistry:workloads/web/function-app:2022-10-29' = {
             }
         }.ToImmutableList();
         var document = new MarkdownDocument();
-        UsageGenerator.BuildUsage(document, new FormatterOptions { IncludeUsage = false }, parameters, usageOptions,
+        UsageGenerator.BuildUsage(document, new FormatterOptions { IncludeUsage = false }, parameters, ImmutableList<ParsedUserDefinedType>.Empty, usageOptions,
             modulePath, "2022-10-29");
 
         Assert.AreEqual(0, document.Count);
+    }
+    
+    [TestMethod]
+    public void BuildResources_UserDefinedTypes()
+    {
+        var usageOptions = new UsageOptions
+        {
+            ModuleAlias = "MyRegistry",
+            ModuleType = ModuleUsageType.Registry
+        };
+        const string modulePath = "workloads/web/function-app";
+        var myTypes = new List<ParsedUserDefinedType>
+        {
+            new ParsedUserDefinedType("myType", new List<ParsedUserDefinedTypeProperty>
+            {
+                new ParsedUserDefinedTypeProperty("Description", "string"),
+                new ParsedUserDefinedTypeProperty("DefaultValue", "string")
+            })
+        }.ToImmutableList();
+        var parameters = new List<ParsedParameter>
+        {
+            new("location", "myType")
+            {
+                Description = "The location of the resource",
+                DefaultValue = "northeurope",
+                IsUserDefinedType = true
+            }
+        }.ToImmutableList();
+        var document = new MarkdownDocument();
+        UsageGenerator.BuildUsage(document, new FormatterOptions(), parameters, myTypes, usageOptions,
+            modulePath, "2022-10-29");
+
+        Assert.AreEqual(2, document.Count);
     }
 }

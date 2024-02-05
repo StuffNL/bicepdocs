@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Reflection.Metadata;
 using System.Text;
 using LandingZones.Tools.BicepDocs.Core.Models.Parsing;
 using LandingZones.Tools.BicepDocs.Core.Services;
@@ -9,14 +10,30 @@ public static class CodeGenerator
 {
     public static string GetBicepExample(string moduleName, string moduleAlias, string moduleType, string path,
         string moduleVersion,
-        IImmutableList<ParsedParameter> parameters)
+        IImmutableList<ParsedParameter> parameters,
+        ImmutableList<ParsedUserDefinedType> userDefinedTypes)
     {
         var sb = new StringBuilder();
         sb.AppendLine();
 
         foreach (var defaultParameter in parameters)
         {
-            sb.AppendLine($"    {defaultParameter.Name}: {GetDefaultValue(defaultParameter)}");
+            if (!defaultParameter.IsUserDefinedType)
+            {
+                sb.AppendLine($"    {defaultParameter.Name}: {GetDefaultValue(defaultParameter)}");
+            }
+            else
+            {
+                sb.AppendLine($"    {defaultParameter.Name}: {{");
+
+                var userDefinedType = userDefinedTypes.FirstOrDefault(x => x.Name == defaultParameter.Type);
+                foreach (var property in userDefinedType.Properties)
+                {
+                    sb.AppendLine($"        {property.Name}: {property.Name}");
+                }
+
+                sb.AppendLine($"    }}");
+            }
         }
 
         var s = sb.ToString();
@@ -30,9 +47,15 @@ public static class CodeGenerator
 
     private static string GetDefaultValue(ParsedParameter parameter)
     {
+
         if (string.IsNullOrEmpty(parameter.DefaultValue))
         {
             return parameter.Type == "string" ? $"'{parameter.Name}'" : parameter.Name;
+        }
+
+        if (parameter.IsUserDefinedType)
+        {
+            return parameter.Type;
         }
 
         if (parameter.Type != "string")

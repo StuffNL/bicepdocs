@@ -344,4 +344,36 @@ public class ParameterGeneratorTests
     }
 
     #endregion
+
+    #region UserDefinedTypes
+    [TestMethod]
+    public void BuildParameters_UserDefinedTypes_BuildsCorrectly()
+    {
+        var expected = @"## Parameters
+
+| Parameter | Description | Type | Default |
+| --- | --- | --- | --- |
+| `budget` | The budgetType | [budgetType](#budgettype) |  |".ToPlatformLineEndings() +
+                       Environment.NewLine;
+
+        var parameters = new List<ParsedParameter>
+        {
+            new("budget", "budgetType")
+            {
+                Description = "The budgetType",
+                IsComplexAllow = false,
+                IsUserDefinedType = true
+            }
+        }.ToImmutableList();
+        var document = new MarkdownDocument();
+
+        ParameterGenerator.BuildParameters(document, new FormatterOptions(), parameters);
+
+        Assert.AreEqual(2, document.Count);
+
+        var md = document.ToMarkdown();
+
+        Assert.AreEqual(expected, md);
+    }
+    #endregion
 }

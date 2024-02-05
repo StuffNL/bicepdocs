@@ -306,4 +306,54 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.AreEqual("'one' | 'three' | 'two'", param.Type);
         Assert.AreEqual("'string-value'", param.DefaultValue);
     }
+
+
+    [TestMethod]
+    public async Task Parameter_UserDefined_Parses()
+    {
+        const string template = @"
+type myType = {
+    property: string
+    property2: int
+    property3: boolean
+}
+
+param typeParam myType
+";
+        var semanticModel = await GetModel(template);
+        var parameters = ParameterParser.ParseParameters(semanticModel);
+
+        var param = parameters.First(x => x.Name == "typeParam");
+        Assert.IsFalse(param.IsComplexAllow);
+        Assert.IsTrue(param.IsUserDefinedType);
+        Assert.IsNull(param.AllowedValues);
+        Assert.AreEqual(param.Type, "myType");
+
+    }
+
+    [TestMethod]
+    public async Task Parameter_ComplexUserDefined_Parses()
+    {
+        const string template = @"
+type budgetType = {
+  name: string
+  contactEmails: string[]
+  threshold1: int
+  threshold2: int  
+  timeGrain: 'Annualy' | 'BillingAnnual' | 'BillingMonth' | 'BillingQuarter' | 'Monthly' | 'Quarterly'
+}
+
+@description('This is the budgetType parameter')
+param budget budgetType
+";
+        var semanticModel = await GetModel(template);
+        var parameters = ParameterParser.ParseParameters(semanticModel);
+
+        var param = parameters.First(x => x.Name == "budget");
+        Assert.IsFalse(param.IsComplexAllow);
+        Assert.IsTrue(param.IsUserDefinedType);
+        Assert.IsNull(param.AllowedValues);
+        Assert.AreEqual(param.Type, "budgetType");
+
+    }
 }

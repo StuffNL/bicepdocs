@@ -12,6 +12,7 @@ internal static class UsageGenerator
         MarkdownDocument document,
         FormatterOptions options,
         ImmutableList<ParsedParameter> parameters,
+        ImmutableList<ParsedUserDefinedType> userDefinedTypes,
         UsageOptions usageOptions,
         string modulePath,
         string moduleVersion)
@@ -24,7 +25,8 @@ internal static class UsageGenerator
             moduleType: usageOptions.ModuleType == ModuleUsageType.Local ? "ts" : "br",
             path: modulePath.TrimStart('/'),
             moduleVersion,
-            parameters);
+            parameters,
+            userDefinedTypes);
         document.Append(new MkCodeBlock(
             usage, "bicep"));
     }
