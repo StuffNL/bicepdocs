@@ -55,7 +55,7 @@ public static class UserDefinedTypeParser
 
             var userDefinedTypeProperty = new ParsedUserDefinedTypeProperty(propertyName,"");
 
-            if (property.Value is UnionTypeSyntax unionType)
+            if (property.Value is UnionTypeSyntax unionType) // Contains a list with allowed values
             {
                 userDefinedTypeProperty.Type = unionType.ToText();
 
@@ -63,11 +63,15 @@ public static class UserDefinedTypeParser
                 var allowValues = allowList.Select(x => x.Replace("'", "")).Where(x => !string.IsNullOrEmpty(x)).ToList();
                 userDefinedTypeProperty.IsComplexAllow = allowList.Length > 2;
                 userDefinedTypeProperty.AllowedValues = allowValues;
-
             }
             else if (property.Value is VariableAccessSyntax variableAccessSyntax)
             {
                 userDefinedTypeProperty.Type = variableAccessSyntax.Name.IdentifierName;
+            }
+            else if (property.Value is NullableTypeSyntax nullableTypeSyntax)
+            {
+                userDefinedTypeProperty.Type = ((VariableAccessSyntax)nullableTypeSyntax.Base).Name.IdentifierName;
+                userDefinedTypeProperty.IsRequired = false;
             }
 
             userDefinedTypeProperty.Description = GetStringDecorator(property, LanguageConstants.MetadataDescriptionPropertyName);

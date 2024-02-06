@@ -16,14 +16,18 @@ internal static class UserDefinedTypeGenerator
         foreach (var userDefinedType in userDefinedTypes)
         {
             document.Append(new MkHeader(userDefinedType.Name, MkHeaderLevel.H3));
-            document.Append(new MkBlockQuote(userDefinedType.Description));
 
-            var typeOverviewTable = new MkTable().AddColumn("Property").AddColumn("Description").AddColumn("Type");
+            if (!string.IsNullOrEmpty(userDefinedType.Description))
+            {
+                document.Append(new MkBlockQuote(userDefinedType.Description));
+            }
+
+            var typeOverviewTable = new MkTable().AddColumn("Property").AddColumn("Description").AddColumn("Type").AddColumn("Required");
 
             foreach (var property in userDefinedType.Properties)
             {
                 var type = BuildType(property);
-                typeOverviewTable.AddRow(property.Name.WrapInBackticks(), property.Description ?? "", type);
+                typeOverviewTable.AddRow(property.Name.WrapInBackticks(), property.Description ?? "", type, property.IsRequired.ToString());
             }
 
             document.Append(typeOverviewTable);

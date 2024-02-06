@@ -20,4 +20,6 @@ public record ParsedUserDefinedTypeProperty(string Name, string Type)
     public int? MaxValue { get; set; }
 
     public bool Secure { get; set; }
+
+    public bool IsRequired { get; set; } = true;
 }

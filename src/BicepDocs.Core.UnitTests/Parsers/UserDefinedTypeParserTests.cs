@@ -75,6 +75,7 @@ type userDefinedType = {
         Assert.IsNotNull(firstProperty.AllowedValues);
         Assert.AreEqual(6, firstProperty.AllowedValues.Count);
         Assert.AreEqual("timeGrain", firstProperty.Name);
+        Assert.IsTrue(firstProperty.IsRequired);
         Assert.AreEqual("'Annually' | 'BillingAnnual' | 'BillingMonth' | 'BillingQuarter' | 'Monthly' | 'Quarterly'", firstProperty.Type);
     }
 
@@ -102,10 +103,44 @@ type complexType = {
         var simpleProperty = userDefinedType.Properties.First();
         Assert.AreEqual("simpleProperty", simpleProperty.Name);
         Assert.AreEqual("string", simpleProperty.Type);
+        Assert.IsTrue(simpleProperty.IsRequired);
 
         var complexProperty = userDefinedType.Properties.Last();
         Assert.AreEqual("complexProperty", complexProperty.Name);
         Assert.AreEqual("complexType", complexProperty.Type);
+        Assert.IsTrue(complexProperty.IsRequired);
+    }
+
+    [TestMethod]
+    public async Task Type_Parameter_Complex_Property_IsOptional_Parses()
+    {
+        const string template = @"
+type userDefinedType = {
+  simpleProperty: string?
+  complexProperty: complexType?
+}
+
+type complexType = {
+  simpleProperty: string?
+}
+";
+        var semanticModel = await GetModel(template);
+        var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
+
+        var userDefinedType = userDefinedTypes.First(x => x.Name == "userDefinedType");
+        Assert.AreEqual("userDefinedType", userDefinedType.Name);
+        Assert.AreEqual("", userDefinedType.Description);
+        Assert.AreEqual(2, userDefinedType.Properties.Count);
+
+        var simpleProperty = userDefinedType.Properties.First();
+        Assert.AreEqual("simpleProperty", simpleProperty.Name);
+        Assert.AreEqual("string", simpleProperty.Type);
+        Assert.IsFalse(simpleProperty.IsRequired);
+
+        var complexProperty = userDefinedType.Properties.Last();
+        Assert.AreEqual("complexProperty", complexProperty.Name);
+        Assert.AreEqual("complexType", complexProperty.Type);
+        Assert.IsFalse(complexProperty.IsRequired);
     }
 
     [TestMethod]
@@ -121,6 +156,5 @@ type allowType = 'dev' | 'tst' | 'acc' | 'prd' | 'shared'
         Assert.AreEqual("allowType", userDefinedType.Name);
         Assert.AreEqual("", userDefinedType.Description);
         Assert.AreEqual(0, userDefinedType.Properties.Count);
-
     }
 }
