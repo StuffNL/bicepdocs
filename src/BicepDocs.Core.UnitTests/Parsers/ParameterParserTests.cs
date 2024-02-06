@@ -388,6 +388,33 @@ param typeParam myType
         Assert.IsTrue(param.IsUserDefinedType);
         Assert.IsNull(param.AllowedValues);
         Assert.AreEqual(param.Type, "myType");
+        Assert.IsTrue(param.IsRequired);
 
+    }
+
+    [TestMethod]
+    public async Task Parameter_ComplexUserDefined_Optionally_Parses()
+    {
+        const string template = @"
+type myType = {
+  stringProp: string
+  arrayProp: string[]
+  intProp: int
+  intProp2: int  
+  timeGrain: 'Annually' | 'BillingAnnual' | 'BillingMonth' | 'BillingQuarter' | 'Monthly' | 'Quarterly'
+}
+
+@description('This is the myType parameter')
+param typeParam myType?
+";
+        var semanticModel = await GetModel(template);
+        var parameters = ParameterParser.ParseParameters(semanticModel);
+
+        var param = parameters.First(x => x.Name == "typeParam");
+        Assert.IsFalse(param.IsComplexAllow);
+        Assert.IsTrue(param.IsUserDefinedType);
+        Assert.IsNull(param.AllowedValues);
+        Assert.AreEqual(param.Type, "myType");
+        Assert.IsFalse(param.IsRequired);
     }
 }

@@ -30,9 +30,11 @@ public static class ParameterParser
 
             var symbol = GetParameterSymbol(model, templateParameter.Key);
 
+            var typeName = templateParameter.Value.TypeReference.Type.Name;
+
             parameter.IsComplexAllow = allowList.Length > 2;
             parameter.AllowedValues = allowValues;
-            parameter.Type = templateParameter.Value.TypeReference.Type.Name;
+            parameter.Type = typeName;
             parameter.IsRequired = metaData.IsRequired;
 
             if (symbol == null)
@@ -40,15 +42,22 @@ public static class ParameterParser
                 parameters.Add(parameter);
                 continue;
             }
-   
 
-            if (symbol.DeclaringParameter.Type is VariableAccessSyntax syntax)
+            typeName = symbol.DeclaringParameter.Type switch
             {
-                parameter.IsUserDefinedType = model.Root.TypeDeclarations.Any(x => x.Name == syntax.Name.IdentifierName);
+                NullableTypeSyntax nullableTypeSyntax => ((VariableAccessSyntax)nullableTypeSyntax.Base).Name
+                    .IdentifierName,
+                VariableAccessSyntax variableAccessSyntax => variableAccessSyntax.Name.IdentifierName,
+                _ => typeName
+            };
+
+            if (symbol.DeclaringParameter.Type is VariableAccessSyntax || symbol.DeclaringParameter.Type is NullableTypeSyntax)
+            {
+                parameter.IsUserDefinedType = model.Root.TypeDeclarations.Any(x => x.Name == typeName);
 
                 if (parameter.IsUserDefinedType)
                 {
-                    parameter.Type = syntax.Name.IdentifierName;
+                    parameter.Type = typeName;
                     parameter.AllowedValues = null;
                     parameter.IsComplexAllow = false;
                 }

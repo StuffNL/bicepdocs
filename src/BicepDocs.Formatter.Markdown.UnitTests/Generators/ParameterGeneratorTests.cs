@@ -377,5 +377,37 @@ public class ParameterGeneratorTests
 
         Assert.AreEqual(expected, md);
     }
+
+
+    [TestMethod]
+    public void BuildParameters_UserDefinedTypes_OptionalParameter()
+    {
+        var expected = @"## Parameters
+
+| Parameter | Description | Type | Default | Required |
+| --- | --- | --- | --- | --- |
+| `budget` | The budgetType | [budgetType](#budgettype) |  | False |".ToPlatformLineEndings() +
+                       Environment.NewLine;
+
+        var parameters = new List<ParsedParameter>
+        {
+            new("budget", "budgetType")
+            {
+                Description = "The budgetType",
+                IsComplexAllow = false,
+                IsUserDefinedType = true,
+                IsRequired = false
+            }
+        }.ToImmutableList();
+        var document = new MarkdownDocument();
+
+        ParameterGenerator.BuildParameters(document, new FormatterOptions(), parameters);
+
+        Assert.AreEqual(2, document.Count);
+
+        var md = document.ToMarkdown();
+
+        Assert.AreEqual(expected, md);
+    }
     #endregion
 }
