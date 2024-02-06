@@ -313,9 +313,9 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
     {
         const string template = @"
 type myType = {
-    property: string
-    property2: int
-    property3: boolean
+    stringProp: string
+    intProp: int
+    intProp2: boolean
 }
 
 param typeParam myType
@@ -335,25 +335,25 @@ param typeParam myType
     public async Task Parameter_ComplexUserDefined_Parses()
     {
         const string template = @"
-type budgetType = {
-  name: string
-  contactEmails: string[]
-  threshold1: int
-  threshold2: int  
-  timeGrain: 'Annualy' | 'BillingAnnual' | 'BillingMonth' | 'BillingQuarter' | 'Monthly' | 'Quarterly'
+type myType = {
+  stringProp: string
+  arrayProp: string[]
+  intProp: int
+  intProp2: int  
+  timeGrain: 'Annually' | 'BillingAnnual' | 'BillingMonth' | 'BillingQuarter' | 'Monthly' | 'Quarterly'
 }
 
-@description('This is the budgetType parameter')
-param budget budgetType
+@description('This is the myType parameter')
+param typeParam myType
 ";
         var semanticModel = await GetModel(template);
         var parameters = ParameterParser.ParseParameters(semanticModel);
 
-        var param = parameters.First(x => x.Name == "budget");
+        var param = parameters.First(x => x.Name == "typeParam");
         Assert.IsFalse(param.IsComplexAllow);
         Assert.IsTrue(param.IsUserDefinedType);
         Assert.IsNull(param.AllowedValues);
-        Assert.AreEqual(param.Type, "budgetType");
+        Assert.AreEqual(param.Type, "myType");
 
     }
 }
