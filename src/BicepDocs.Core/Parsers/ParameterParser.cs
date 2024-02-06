@@ -14,6 +14,7 @@ public static class ParameterParser
         var parameters = new List<ParsedParameter>();
         foreach (var templateParameter in model.Parameters.OrderBy(x => x.Key))
         {
+            var metaData = templateParameter.Value;
             var parameter = new ParsedParameter
             (
                 Name: templateParameter.Key,
@@ -32,6 +33,7 @@ public static class ParameterParser
             parameter.IsComplexAllow = allowList.Length > 2;
             parameter.AllowedValues = allowValues;
             parameter.Type = templateParameter.Value.TypeReference.Type.Name;
+            parameter.IsRequired = metaData.IsRequired;
 
             if (symbol == null)
             {

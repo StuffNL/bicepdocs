@@ -23,4 +23,6 @@ public record ParsedParameter(string Name, string Type)
 
     public bool IsUserDefinedType { get; set; }
 
+    public bool IsRequired { get; set; }
+
 }

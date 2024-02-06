@@ -35,6 +35,9 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.AreEqual("object", tags.Type);
         Assert.AreEqual("{}", tags.DefaultValue);
         Assert.AreEqual("Tags to append to resource group", tags.Description);
+
+        var resourceGroupName = parameters.First(x => x.Name == "resourceGroupName");
+        Assert.IsTrue(resourceGroupName.IsRequired);
     }
 
 
@@ -135,6 +138,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.AreEqual("stringParam", param.Name);
         Assert.AreEqual("string", param.Type);
         Assert.AreEqual("'string-value'", param.DefaultValue);
+        Assert.IsFalse(param.IsRequired);
     }
 
     [TestMethod]
@@ -155,6 +159,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.AreEqual("boolParam", param.Name);
         Assert.AreEqual("bool", param.Type);
         Assert.AreEqual("true", param.DefaultValue);
+        Assert.IsFalse(param.IsRequired);
     }
 
     [TestMethod]
@@ -175,6 +180,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.AreEqual("objectParam", param.Name);
         Assert.AreEqual("object", param.Type);
         Assert.AreEqual("{}", param.DefaultValue);
+        Assert.IsFalse(param.IsRequired);
     }
 
     [TestMethod]
@@ -196,6 +202,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.IsTrue(param.IsComplexDefault);
         Assert.AreEqual("objectParam", param.Name);
         Assert.AreEqual("object", param.Type);
+        Assert.IsFalse(param.IsRequired);
         Assert.AreEqual(@"{
 name: 'hello'
 }", param.DefaultValue);
@@ -219,6 +226,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.AreEqual("arrayParam", param.Name);
         Assert.AreEqual("array", param.Type);
         Assert.AreEqual("[]", param.DefaultValue);
+        Assert.IsFalse(param.IsRequired);
     }
 
     [DataTestMethod]
@@ -271,6 +279,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.IsTrue(param.IsComplexDefault);
         Assert.AreEqual("arrayParam", param.Name);
         Assert.AreEqual("array", param.Type);
+        Assert.IsFalse(param.IsRequired);
         Assert.AreEqual(@"[
 'one'
 'two'
@@ -305,6 +314,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
         Assert.AreEqual("stringParam", param.Name);
         Assert.AreEqual("'one' | 'three' | 'two'", param.Type);
         Assert.AreEqual("'string-value'", param.DefaultValue);
+        Assert.IsFalse(param.IsRequired);
     }
 
 
@@ -328,6 +338,30 @@ param typeParam myType
         Assert.IsTrue(param.IsUserDefinedType);
         Assert.IsNull(param.AllowedValues);
         Assert.AreEqual(param.Type, "myType");
+        Assert.IsTrue(param.IsRequired);
+
+    }
+
+    public async Task Parameter_UserDefined_Optionally_Parses()
+    {
+        const string template = @"
+type myType = {
+    stringProp: string
+    intProp: int
+    intProp2: boolean
+}
+
+param typeParam myType?
+";
+        var semanticModel = await GetModel(template);
+        var parameters = ParameterParser.ParseParameters(semanticModel);
+
+        var param = parameters.First(x => x.Name == "typeParam");
+        Assert.IsFalse(param.IsComplexAllow);
+        Assert.IsTrue(param.IsUserDefinedType);
+        Assert.IsNull(param.AllowedValues);
+        Assert.AreEqual(param.Type, "myType");
+        Assert.IsFalse(param.IsRequired);
 
     }
 

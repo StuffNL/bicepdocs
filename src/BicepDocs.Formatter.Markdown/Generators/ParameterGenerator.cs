@@ -16,7 +16,7 @@ internal static class ParameterGenerator
 
         document.Append(new MkHeader("Parameters", MkHeaderLevel.H2));
         var paramOverviewTable = new MkTable().AddColumn("Parameter").AddColumn("Description").AddColumn("Type")
-            .AddColumn("Default");
+            .AddColumn("Default").AddColumn("Required");
 
 
         foreach (var tp in parameters.OrderBy(x => x.Name))
@@ -24,7 +24,7 @@ internal static class ParameterGenerator
             var type = BuildType(tp);
             var dfValue = GetParameterDefault(tp);
 
-            paramOverviewTable.AddRow(tp.Name.WrapInBackticks(), tp.Description ?? "", type, dfValue);
+            paramOverviewTable.AddRow(tp.Name.WrapInBackticks(), tp.Description ?? "", type, dfValue, tp.IsRequired.ToString());
         }
 
         document.Append(paramOverviewTable);

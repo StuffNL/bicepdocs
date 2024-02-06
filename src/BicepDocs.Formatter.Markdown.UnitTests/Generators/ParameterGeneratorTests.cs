@@ -56,9 +56,9 @@ public class ParameterGeneratorTests
     {
         string expected = $@"## Parameters
 
-| Parameter | Description | Type | Default |
-| --- | --- | --- | --- |
-| `location` | The location of the resource | string {expectedDesc} |  |".ToPlatformLineEndings() + Environment.NewLine;
+| Parameter | Description | Type | Default | Required |
+| --- | --- | --- | --- | --- |
+| `location` | The location of the resource | string {expectedDesc} |  | True |".ToPlatformLineEndings() + Environment.NewLine;
 
         var parameters = new List<ParsedParameter>
         {
@@ -69,7 +69,8 @@ public class ParameterGeneratorTests
                 MaxValue = maxValue,
                 MinLength = minLength,
                 MaxLength = maxLength,
-                Secure = secure
+                Secure = secure,
+                IsRequired = true
             }
         }.ToImmutableList();
         var document = new MarkdownDocument();
@@ -88,9 +89,9 @@ public class ParameterGeneratorTests
     {
         var expected = @"## Parameters
 
-| Parameter | Description | Type | Default |
-| --- | --- | --- | --- |
-| `location` | The location of the resource | string |  |".ToPlatformLineEndings() + Environment.NewLine;
+| Parameter | Description | Type | Default | Required |
+| --- | --- | --- | --- | --- |
+| `location` | The location of the resource | string |  | False |".ToPlatformLineEndings() + Environment.NewLine;
 
         var parameters = new List<ParsedParameter>
         {
@@ -115,9 +116,9 @@ public class ParameterGeneratorTests
     {
         var expected = @"## Parameters
 
-| Parameter | Description | Type | Default |
-| --- | --- | --- | --- |
-| `location` | The location of the resource | string | northeurope |".ToPlatformLineEndings() + Environment.NewLine;
+| Parameter | Description | Type | Default | Required |
+| --- | --- | --- | --- | --- |
+| `location` | The location of the resource | string | northeurope | False |".ToPlatformLineEndings() + Environment.NewLine;
 
         var parameters = new List<ParsedParameter>
         {
@@ -143,9 +144,9 @@ public class ParameterGeneratorTests
     {
         var expected = @"## Parameters
 
-| Parameter | Description | Type | Default |
-| --- | --- | --- | --- |
-| `location` | The location of the resource | string | `resourceGroup().location` |".ToPlatformLineEndings() +
+| Parameter | Description | Type | Default | Required |
+| --- | --- | --- | --- | --- |
+| `location` | The location of the resource | string | `resourceGroup().location` | False |".ToPlatformLineEndings() +
                        Environment.NewLine;
 
         var parameters = new List<ParsedParameter>
@@ -173,9 +174,9 @@ public class ParameterGeneratorTests
     {
         var expected = @"## Parameters
 
-| Parameter | Description | Type | Default |
-| --- | --- | --- | --- |
-| `location` | The location of the resource | [locationAllow](#locationallow) |  |".ToPlatformLineEndings() +
+| Parameter | Description | Type | Default | Required |
+| --- | --- | --- | --- | --- |
+| `location` | The location of the resource | [locationAllow](#locationallow) |  | False |".ToPlatformLineEndings() +
                        Environment.NewLine;
 
         var parameters = new List<ParsedParameter>
@@ -202,9 +203,9 @@ public class ParameterGeneratorTests
     {
         var expected = @"## Parameters
 
-| Parameter | Description | Type | Default |
-| --- | --- | --- | --- |
-| `location` | The location of the resource | [locationAllow](#locationallow) | one |".ToPlatformLineEndings() +
+| Parameter | Description | Type | Default | Required |
+| --- | --- | --- | --- | --- |
+| `location` | The location of the resource | [locationAllow](#locationallow) | one | False |".ToPlatformLineEndings() +
                        Environment.NewLine;
 
         var parameters = new List<ParsedParameter>
@@ -351,9 +352,9 @@ public class ParameterGeneratorTests
     {
         var expected = @"## Parameters
 
-| Parameter | Description | Type | Default |
-| --- | --- | --- | --- |
-| `budget` | The budgetType | [budgetType](#budgettype) |  |".ToPlatformLineEndings() +
+| Parameter | Description | Type | Default | Required |
+| --- | --- | --- | --- | --- |
+| `budget` | The budgetType | [budgetType](#budgettype) |  | True |".ToPlatformLineEndings() +
                        Environment.NewLine;
 
         var parameters = new List<ParsedParameter>
@@ -362,7 +363,8 @@ public class ParameterGeneratorTests
             {
                 Description = "The budgetType",
                 IsComplexAllow = false,
-                IsUserDefinedType = true
+                IsUserDefinedType = true,
+                IsRequired = true
             }
         }.ToImmutableList();
         var document = new MarkdownDocument();
