@@ -54,4 +54,18 @@ public class MetaGeneratorTests
 
         Assert.AreEqual(0, md.Count);
     }
+
+    [TestMethod]
+    public void BuildDescription_OwnerSet_Generates()
+    {
+        const string expected = @"> Owner: Some Owner
+";
+        var md = new MarkdownDocument();
+        MetaGenerator.BuildDescription(md, new MetadataModel
+        {
+            Owner = "Some Owner"
+        });
+
+        Assert.AreEqual(expected, md.ToMarkdown());
+    }
 }

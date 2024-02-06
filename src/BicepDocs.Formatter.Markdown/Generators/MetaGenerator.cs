@@ -15,5 +15,8 @@ internal static class MetaGenerator
     {
         if (!string.IsNullOrEmpty(metadata?.Description))
             document.Append(new MkBlockQuote(metadata.Description));
+
+        if (!string.IsNullOrEmpty(metadata?.Owner))
+            document.Append(new MkBlockQuote($"Owner: {metadata.Owner}" ));
     }
 }
