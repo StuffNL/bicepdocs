@@ -26,9 +26,21 @@ public static class UserDefinedTypeParser
             );
             userDefinedTypes.Add(userDefinedType);
 
-            if (typeDeclaration.Value is ObjectTypeSyntax typeObject)
+            if (typeDeclaration.Value is ObjectTypeSyntax typeObjectSynax)
             {
-                userDefinedType.Properties = ParseProperties(model, typeObject);
+                userDefinedType.Properties = ParseProperties(model, typeObjectSynax);
+            }
+            if (typeDeclaration.Value is UnionTypeSyntax unionTypeSyntax) // IsPrimitiveLiteral Union type
+            {
+                userDefinedType.Description = typeDeclaration.Value.ToText();
+                userDefinedType.IsPrimitiveLiteral = true;
+                continue;
+            }
+            if (typeDeclaration.Value is IntegerLiteralSyntax integerLiteralSyntax) // IsPrimitiveLiteral Int type
+            {
+                userDefinedType.Description = integerLiteralSyntax.ToText();
+                userDefinedType.IsPrimitiveLiteral = true;
+                continue;
             }
 
             var symbol = GetUserDefinedTypeSymbol(model, typeDeclaration.Name);

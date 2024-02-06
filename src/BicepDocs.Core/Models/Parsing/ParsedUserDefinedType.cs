@@ -10,4 +10,6 @@ public record ParsedUserDefinedType(string Name, List<ParsedUserDefinedTypePrope
     public string? Description { get; set; }
 
     public List<ParsedUserDefinedTypeProperty> Properties { get; set; } = Properties;
+
+    public bool IsPrimitiveLiteral { get; set; } = false;
 }

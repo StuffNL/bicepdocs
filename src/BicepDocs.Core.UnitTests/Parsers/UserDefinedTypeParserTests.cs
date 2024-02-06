@@ -23,6 +23,7 @@ type userDefinedType = {
         Assert.AreEqual("userDefinedType", userDefinedType.Name);
         Assert.AreEqual("This is the userDefinedType", userDefinedType.Description);
         Assert.AreEqual(1, userDefinedType.Properties.Count);
+        Assert.IsFalse(userDefinedType.IsPrimitiveLiteral);
 
     }
 
@@ -44,6 +45,7 @@ type userDefinedType = {
         Assert.AreEqual("userDefinedType", userDefinedType.Name);
         Assert.AreEqual("", userDefinedType.Description);
         Assert.AreEqual(1, userDefinedType.Properties.Count);
+        Assert.IsFalse(userDefinedType.IsPrimitiveLiteral);
 
         var firstProperty = userDefinedType.Properties.First();
         Assert.AreEqual(1, firstProperty.MinValue);
@@ -68,6 +70,7 @@ type userDefinedType = {
         Assert.AreEqual("userDefinedType", userDefinedType.Name);
         Assert.AreEqual("", userDefinedType.Description);
         Assert.AreEqual(1, userDefinedType.Properties.Count);
+        Assert.IsFalse(userDefinedType.IsPrimitiveLiteral);
 
         var firstProperty = userDefinedType.Properties.First();
         Assert.IsTrue(firstProperty.IsComplexAllow);
@@ -99,6 +102,7 @@ type complexType = {
         Assert.AreEqual("userDefinedType", userDefinedType.Name);
         Assert.AreEqual("", userDefinedType.Description);
         Assert.AreEqual(2, userDefinedType.Properties.Count);
+        Assert.IsFalse(userDefinedType.IsPrimitiveLiteral);
 
         var simpleProperty = userDefinedType.Properties.First();
         Assert.AreEqual("simpleProperty", simpleProperty.Name);
@@ -131,6 +135,7 @@ type complexType = {
         Assert.AreEqual("userDefinedType", userDefinedType.Name);
         Assert.AreEqual("", userDefinedType.Description);
         Assert.AreEqual(2, userDefinedType.Properties.Count);
+        Assert.IsFalse(userDefinedType.IsPrimitiveLiteral);
 
         var simpleProperty = userDefinedType.Properties.First();
         Assert.AreEqual("simpleProperty", simpleProperty.Name);
@@ -141,20 +146,38 @@ type complexType = {
         Assert.AreEqual("complexProperty", complexProperty.Name);
         Assert.AreEqual("complexType", complexProperty.Type);
         Assert.IsFalse(complexProperty.IsRequired);
+
     }
 
     [TestMethod]
-    public async Task Type_No_Properties_Parser()
+    public async Task Type_IsPrimitiveLiteral_String_Parser()
     {
         const string template = @"
-type allowType = 'dev' | 'tst' | 'acc' | 'prd' | 'shared'
+type myStringLiteralType = 'dev' | 'tst' | 'acc' | 'prd' | 'shared'
 ";
         var semanticModel = await GetModel(template);
         var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
 
-        var userDefinedType = userDefinedTypes.First(x => x.Name == "allowType");
-        Assert.AreEqual("allowType", userDefinedType.Name);
-        Assert.AreEqual("", userDefinedType.Description);
+        var userDefinedType = userDefinedTypes.First(x => x.Name == "myStringLiteralType");
+        Assert.AreEqual("myStringLiteralType", userDefinedType.Name);
+        Assert.AreEqual("'dev' | 'tst' | 'acc' | 'prd' | 'shared'", userDefinedType.Description);
         Assert.AreEqual(0, userDefinedType.Properties.Count);
+        Assert.IsTrue(userDefinedType.IsPrimitiveLiteral);
+    }
+
+    [TestMethod]
+    public async Task Type_IsPrimitiveLiteral_Int_Parser()
+    {
+        const string template = @"
+type myIntLiteralType = 10
+";
+        var semanticModel = await GetModel(template);
+        var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
+
+        var userDefinedType = userDefinedTypes.First(x => x.Name == "myIntLiteralType");
+        Assert.AreEqual("myIntLiteralType", userDefinedType.Name);
+        Assert.AreEqual("10", userDefinedType.Description);
+        Assert.AreEqual(0, userDefinedType.Properties.Count);
+        Assert.IsTrue(userDefinedType.IsPrimitiveLiteral);
     }
 }

@@ -116,5 +116,38 @@ public class UserDefinedTypeGeneratorTests
 
         Assert.AreEqual(expected, md);
     }
+
+
+    [TestMethod]
+    public void BuildParameters_UserDefinedTypes_IsPrimitiveLiteral()
+    {
+        var expected = @"## User Defined Types
+
+### primitiveLiteralType
+
+> 'westeurope' | 'northeurope'".ToPlatformLineEndings() +
+                       Environment.NewLine;
+
+        var userDefinedTypes = new List<ParsedUserDefinedType>
+        {
+            new ParsedUserDefinedType("primitiveLiteralType", new List<ParsedUserDefinedTypeProperty>
+            {
+                
+            })
+            {
+                Description = "'westeurope' | 'northeurope'",
+                IsPrimitiveLiteral = true
+            }
+        }.ToImmutableList();
+        var document = new MarkdownDocument();
+
+        UserDefinedTypeGenerator.BuildUserDefinedTypes(document, userDefinedTypes);
+
+        Assert.AreEqual(3, document.Count);
+
+        var md = document.ToMarkdown();
+
+        Assert.AreEqual(expected, md);
+    }
     #endregion
 }
