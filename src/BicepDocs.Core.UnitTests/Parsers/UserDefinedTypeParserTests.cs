@@ -180,4 +180,20 @@ type myIntLiteralType = 10
         Assert.AreEqual(0, userDefinedType.Properties.Count);
         Assert.IsTrue(userDefinedType.IsPrimitiveLiteral);
     }
+
+    [TestMethod]
+    public async Task Type_IsPrimitiveLiteral_String_Single_Parser()
+    {
+        const string template = @"
+type myStringLiteralType = 'single'
+";
+        var semanticModel = await GetModel(template);
+        var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
+
+        var userDefinedType = userDefinedTypes.First(x => x.Name == "myStringLiteralType");
+        Assert.AreEqual("myStringLiteralType", userDefinedType.Name);
+        Assert.AreEqual("'single'", userDefinedType.Description);
+        Assert.AreEqual(0, userDefinedType.Properties.Count);
+        Assert.IsTrue(userDefinedType.IsPrimitiveLiteral);
+    }
 }

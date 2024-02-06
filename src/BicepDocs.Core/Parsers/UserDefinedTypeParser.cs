@@ -42,6 +42,12 @@ public static class UserDefinedTypeParser
                 userDefinedType.IsPrimitiveLiteral = true;
                 continue;
             }
+            if (typeDeclaration.Value is StringSyntax stringSyntax) // IsPrimitiveLiteral Int type
+            {
+                userDefinedType.Description = stringSyntax.ToText();
+                userDefinedType.IsPrimitiveLiteral = true;
+                continue;
+            }
 
             var symbol = GetUserDefinedTypeSymbol(model, typeDeclaration.Name);
             
