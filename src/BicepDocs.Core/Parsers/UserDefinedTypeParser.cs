@@ -26,9 +26,9 @@ public static class UserDefinedTypeParser
             );
             userDefinedTypes.Add(userDefinedType);
 
-            if (typeDeclaration.Value is ObjectTypeSyntax typeObjectSynax)
+            if (typeDeclaration.Value is ObjectTypeSyntax typeObjectSyntax)
             {
-                userDefinedType.Properties = ParseProperties(model, typeObjectSynax);
+                userDefinedType.Properties = ParseProperties(model, typeObjectSyntax);
             }
             if (typeDeclaration.Value is UnionTypeSyntax unionTypeSyntax) // IsPrimitiveLiteral Union type
             {

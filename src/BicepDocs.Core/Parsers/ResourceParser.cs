@@ -19,11 +19,11 @@ public static class ResourceParser
             var resourceType = string.Join("/", resource.TypeReference.TypeSegments.Skip(1));
             var parsedResource = new ParsedResource(resource.Type.Name, provider, resourceType)
             {
-                Name = declaredResource?.TryGetNameSyntax()?.ToTextPreserveFormatting(),
+                Name = declaredResource?.TryGetNameSyntax()?.ToText(),
                 IsExisting = resource.IsExistingResource,
                 ApiVersion = resource.TypeReference.ApiVersion,
                 DocUrl = ResourceLinkBuilder.GetResourceUrl(resource.TypeReference),
-                Scope = declaredResource?.TryGetScopeSyntax()?.ToTextPreserveFormatting()
+                Scope = declaredResource?.TryGetScopeSyntax()?.ToText()
             };
 
             if (!resources.Any(x => x.Identifier == parsedResource.Identifier && x.ApiVersion == parsedResource.ApiVersion && !x.IsExisting))

@@ -77,7 +77,7 @@ public static class ParameterParser
             var defaultValueSyntaxBase = GetDefaultValue(symbol);
             if (defaultValueSyntaxBase != null)
             {
-                parameter.DefaultValue = defaultValueSyntaxBase.ToTextPreserveFormatting();
+                parameter.DefaultValue = defaultValueSyntaxBase.ToString();
                 parameter.IsComplexDefault = defaultValueSyntaxBase switch
                 {
                     ObjectSyntax objectSyntax when objectSyntax.ToNamedPropertyDictionary().IsEmpty => false,

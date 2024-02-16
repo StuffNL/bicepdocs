@@ -11,8 +11,8 @@ using Bicep.Core.FileSystem;
 using Bicep.Core.Registry;
 using Bicep.Core.Registry.Auth;
 using Bicep.Core.Semantics.Namespaces;
-using Bicep.Core.TypeSystem;
-using Bicep.Core.TypeSystem.Az;
+using Bicep.Core.TypeSystem.Providers;
+using Bicep.Core.TypeSystem.Providers.Az;
 using Bicep.Core.Utils;
 using Bicep.Decompiler;
 using LandingZones.Tools.BicepDocs.Core.Abstractions;
@@ -31,7 +31,7 @@ public static class Installer
 {
     public static IServiceCollection AddBicepCore(this IServiceCollection services) => services
         .AddSingleton<IResourceTypeLoader, AzResourceTypeLoader>()
-        .AddSingleton<IResourceTypeLoaderFactory, AzResourceTypeLoaderFactory>()
+        .AddSingleton<IResourceTypeProviderFactory, ResourceTypeProviderFactory>()
         .AddSingleton<INamespaceProvider, DefaultNamespaceProvider>()
         .AddSingleton<IModuleDispatcher, ModuleDispatcher>()
         .AddSingleton<IArtifactRegistryProvider, EmptyModuleRegistryProvider>()
