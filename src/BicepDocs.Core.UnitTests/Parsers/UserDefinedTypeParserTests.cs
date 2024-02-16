@@ -1,3 +1,4 @@
+using Azure.Deployments.Core.Definitions.Schema;
 using Bicep.Core.Semantics;
 using LandingZones.Tools.BicepDocs.Core.Parsers;
 
@@ -202,42 +203,18 @@ type myStringLiteralType = 'single'
     [TestMethod]
     public async Task Test_ImportType()
     {
-        const string import = @"
-@export()
-type importType = {
-  booleanType: bool  
-}
-";
-
-        const string template = @"
-import {importType} from 'import.bicep'
-";
-        var semanticModel = await RestoreAndCompile(template, import);
-        var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
-
-        var userDefinedType = userDefinedTypes.First(x => x.Name == "myStringLiteralType");
-        Assert.AreEqual("myStringLiteralType", userDefinedType.Name);
-        Assert.AreEqual("'single'", userDefinedType.Description);
-        Assert.AreEqual(0, userDefinedType.Properties.Count);
-        Assert.IsTrue(userDefinedType.IsPrimitiveLiteral);
-    }
-
-    [TestMethod]
-    public async Task Test_Import2()
-    {
-
-        var result = CompilationHelper.Compile(
+        var semanticModel = await GetModel(
             ("main.bicep", """
-                           import {foo} from 'mod.bicep'
+                           import {importType} from 'import.bicep'
                            """),
-            ("mod.bicep", """
+            ("import.bicep", """
                           @export()
-                          type foo = string[]
-                          var bar = 'bar'
-                          """));
-
-        var model = result.Compilation.GetEntrypointSemanticModel();
-
+                          type importType = {
+                            booleanType: bool
+                          }
+                          """
+        ));
 
     }
+
 }

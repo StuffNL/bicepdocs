@@ -1,6 +1,4 @@
-using System.Collections.ObjectModel;
 using System.IO.Abstractions;
-using System.Runtime.InteropServices.ComTypes;
 using Bicep.Core;
 using Bicep.Core.FileSystem;
 using Bicep.Core.Semantics;
@@ -49,30 +47,31 @@ public abstract class BicepFileTestBase
     }
 
 
-    protected async Task<SemanticModel> RestoreAndCompile(string fileContent, string importContent,
-        string fileName = "deploy.bicep", string importFileName = "import.bicep")
+
+
+    protected async Task<SemanticModel> GetModel(params (string fileName, string fileContents)[] files)
     {
 
-        var vPath = Path.Join("/modules", fileName).ToPlatformPath();
-        FileSystem.Directory.CreateDirectory("/modules".ToPlatformPath());
-        await FileSystem.File.WriteAllTextAsync(vPath, fileContent);
+        var (uriDictionary, entryUri) = CreateFileDictionary(files.Select(file => ("/path/to", file.fileName, file.fileContents)).ToArray(), "main.bicep");
 
-        //if (!string.IsNullOrEmpty(importContent))
-        //{
-        var importPath = Path.Join("/modules", importFileName).ToPlatformPath();
-        await FileSystem.File.WriteAllTextAsync(importPath, importContent);
-        //}
-
-        var files = new Dictionary<Uri, string>()
-        {
-            { PathResolver.FilePathToUri(vPath), fileContent },
-            { PathResolver.FilePathToUri(importPath), importContent }
-        };
-        var workspace = CreateWorkspace(files);
+        var sourceFiles = uriDictionary
+            .Where(x => PathHelper.HasBicepparamsExtension(x.Key) || PathHelper.HasBicepExtension(x.Key) || PathHelper.HasArmTemplateLikeExtension(x.Key))
+            .ToDictionary(x => x.Key, x => x.Value);
 
         var compiler = ServiceProvider.GetRequiredService<BicepCompiler>();
-        var compilation = await compiler.CreateCompilation(PathResolver.FilePathToUri(vPath), workspace);
+        var workspace = CreateWorkspace(sourceFiles);
+        var compilation = await compiler.CreateCompilation(entryUri, workspace);
         return compilation.GetEntrypointSemanticModel();
+    }
+
+    public static (IReadOnlyDictionary<Uri, string> files, Uri entryFileUri) CreateFileDictionary(IEnumerable<(string filePath, string fileName, string fileContents)> files, string entryFileName)
+    {
+        var (entryFilePath, _, _) = files.Where(x => x.fileName == entryFileName).First();
+        var uriDictionary = files.ToDictionary(
+            x => InMemoryFileResolver.GetFileUri($"{x.filePath}/{x.fileName}"),
+            x => x.fileContents);
+        var entryUri = InMemoryFileResolver.GetFileUri($"{entryFilePath}/{entryFileName}");
+        return (uriDictionary, entryUri);
     }
 
     public static IWorkspace CreateWorkspace(IReadOnlyDictionary<Uri, string> uriDictionary)
@@ -83,4 +82,5 @@ public abstract class BicepFileTestBase
 
         return workspace;
     }
+
 }

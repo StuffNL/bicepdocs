@@ -14,6 +14,7 @@ using Bicep.Core.Semantics.Namespaces;
 using Bicep.Core.TypeSystem.Providers;
 using Bicep.Core.TypeSystem.Providers.Az;
 using Bicep.Core.Utils;
+using Bicep.Core.Workspaces;
 using Bicep.Decompiler;
 using LandingZones.Tools.BicepDocs.Core.Abstractions;
 using LandingZones.Tools.BicepDocs.Core.Services;
@@ -43,7 +44,8 @@ public static class Installer
         .AddSingleton<IBicepAnalyzer, LinterAnalyzer>()
         .AddSingleton<IFeatureProviderFactory, FeatureProviderFactory>()
         .AddSingleton<ILinterRulesProvider, LinterRulesProvider>()
-        .AddSingleton<BicepCompiler>();
+        .AddSingleton<BicepCompiler>()
+        .AddSingleton<IWorkspace, Workspace>();
 
     public static IServiceCollection AddBicepDecompiler(this IServiceCollection services) => services
         .AddScoped<BicepDecompiler>();
