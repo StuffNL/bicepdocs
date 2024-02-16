@@ -16,6 +16,18 @@ public static class UserDefinedTypeParser
     public static ImmutableList<ParsedUserDefinedType> ParseUserDefinedTypes(SemanticModel model)
     {
         var userDefinedTypes = new List<ParsedUserDefinedType>();
+
+        foreach (var importedType in model.Root.ImportedTypes.OrderBy(x => x.Name))
+        {
+            var userDefinedType = new ParsedUserDefinedType
+            (
+                Name: importedType.Name,
+                Properties: new List<ParsedUserDefinedTypeProperty>()
+            );
+            userDefinedTypes.Add(userDefinedType);
+
+        }
+
         foreach (var typeDeclaration in model.Root.TypeDeclarations.OrderBy(x => x.Name))
         {
 
@@ -64,7 +76,8 @@ public static class UserDefinedTypeParser
 
     private static List<ParsedUserDefinedTypeProperty> ParseProperties(SemanticModel model, ObjectTypeSyntax properties)
     {
-        
+
+
         var parsedUserDefinedTypeProperties = new List<ParsedUserDefinedTypeProperty>();
 
         foreach (var property in properties.Properties)
