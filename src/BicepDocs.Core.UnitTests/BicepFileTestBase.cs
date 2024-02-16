@@ -60,7 +60,7 @@ public abstract class BicepFileTestBase
 
         var compiler = ServiceProvider.GetRequiredService<BicepCompiler>();
         var workspace = CreateWorkspace(sourceFiles);
-        var compilation = await compiler.CreateCompilation(entryUri, workspace);
+        var compilation = compiler.CreateCompilationWithoutRestore(entryUri, workspace);
         return compilation.GetEntrypointSemanticModel();
     }
 

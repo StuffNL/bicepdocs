@@ -31,11 +31,12 @@ public class EmptyModuleRegistryProvider : IArtifactRegistryProvider
 public static class Installer
 {
     public static IServiceCollection AddBicepCore(this IServiceCollection services) => services
-        .AddSingleton<IResourceTypeLoader, AzResourceTypeLoader>()
-        .AddSingleton<IResourceTypeProviderFactory, ResourceTypeProviderFactory>()
         .AddSingleton<INamespaceProvider, DefaultNamespaceProvider>()
+        .AddSingleton<IResourceTypeProviderFactory, ResourceTypeProviderFactory>()
+        .AddSingleton<IContainerRegistryClientFactory, ContainerRegistryClientFactory>()
+        .AddSingleton<ITemplateSpecRepositoryFactory, TemplateSpecRepositoryFactory>()
         .AddSingleton<IModuleDispatcher, ModuleDispatcher>()
-        .AddSingleton<IArtifactRegistryProvider, EmptyModuleRegistryProvider>()
+        .AddSingleton<IArtifactRegistryProvider, DefaultArtifactRegistryProvider>()
         .AddSingleton<ITokenCredentialFactory, TokenCredentialFactory>()
         .AddSingleton<IFileResolver, FileResolver>()
         .AddSingleton<IEnvironment, Bicep.Core.Utils.Environment>()

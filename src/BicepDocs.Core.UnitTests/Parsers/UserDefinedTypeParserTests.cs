@@ -215,6 +215,10 @@ type myStringLiteralType = 'single'
                           """
         ));
 
+        var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
+        var userDefinedType = userDefinedTypes.First(x => x.Name == "importType");
+        Assert.AreEqual("importType", userDefinedType.Name);
+
     }
 
 }
