@@ -17,7 +17,7 @@ public abstract class BicepFileTestBase
     {
 
         var sp = new ServiceCollection();
-        sp.AddBicepCore().AddBicepFileService();
+        sp.AddBicepCore().AddBicepFileService().AddMockFileSystem();
         ServiceProvider = new DefaultServiceProviderFactory().CreateBuilder(sp).BuildServiceProvider();
         FileSystem = ServiceProvider.GetRequiredService<IFileSystem>();
     }

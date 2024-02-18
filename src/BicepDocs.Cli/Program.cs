@@ -39,6 +39,7 @@ public static class Program
             .AddStaticFileSystem()
             .AddConfigurationLoader()
             .AddBicepCore()
+            .AddIoFileSystem()
             .AddBicepDecompiler()
             .AddBicepFileService()
             .AddFileSystemSource()

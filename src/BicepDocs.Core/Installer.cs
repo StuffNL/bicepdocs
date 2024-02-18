@@ -19,6 +19,7 @@ using Bicep.Decompiler;
 using LandingZones.Tools.BicepDocs.Core.Abstractions;
 using LandingZones.Tools.BicepDocs.Core.Services;
 using Microsoft.Extensions.DependencyInjection;
+using IOFileSystem = System.IO.Abstractions.FileSystem;
 
 
 namespace LandingZones.Tools.BicepDocs.Core;
@@ -40,7 +41,7 @@ public static class Installer
         .AddSingleton<ITokenCredentialFactory, TokenCredentialFactory>()
         .AddSingleton<IFileResolver, FileResolver>()
         .AddSingleton<IEnvironment, Bicep.Core.Utils.Environment>()
-        .AddSingleton<IFileSystem, MockFileSystem>()
+        //.AddSingleton<IFileSystem, IOFileSystem>()
         .AddSingleton<IConfigurationManager, ConfigurationManager>()
         .AddSingleton<IBicepAnalyzer, LinterAnalyzer>()
         .AddSingleton<IFeatureProviderFactory, FeatureProviderFactory>()
@@ -64,5 +65,15 @@ public static class Installer
     public static IServiceCollection AddBicepFileService(this IServiceCollection services)
     {
         return services.AddTransient<IBicepFileService, BicepFileService>();
+    }
+
+    public static IServiceCollection AddIoFileSystem(this IServiceCollection services)
+    {
+        return services.AddSingleton<IFileSystem, IOFileSystem>();
+    }
+
+    public static IServiceCollection AddMockFileSystem(this IServiceCollection services)
+    {
+        return services.AddSingleton<IFileSystem, MockFileSystem>();
     }
 }

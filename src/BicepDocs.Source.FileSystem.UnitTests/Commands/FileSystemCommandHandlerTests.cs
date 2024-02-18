@@ -130,7 +130,6 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2021-01-01' = {
             .Setup(x => x.File.WriteAllTextAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<CancellationToken>()))
             .Returns(Task.CompletedTask);
 
-
         var result = await sut.InvokeAsync(new InvocationContext(null!));
         Assert.AreEqual(0, result);
     }

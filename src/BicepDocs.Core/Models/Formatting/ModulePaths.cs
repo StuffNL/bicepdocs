@@ -13,6 +13,7 @@ namespace LandingZones.Tools.BicepDocs.Core.Models.Formatting;
 /// <param name="RelativeInputPath"></param>
 /// <param name="VirtualFolder"></param>
 /// <param name="OutputFolder"></param>
+/// <param name="BicepUri"></param>
 public record ModulePaths(
     string InputFolder,
     string OutputBaseFolder,
@@ -23,4 +24,5 @@ public record ModulePaths(
     string OutputPath,
     string RelativeInputPath,
     string VirtualFolder,
-    string OutputFolder);
+    string OutputFolder,
+    Uri BicepUri);

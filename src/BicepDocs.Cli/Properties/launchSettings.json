@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "BicepDocs.Cli": {
+      "commandName": "Project",
+      "commandLineArgs": "generate filesystem --folderPath \"C:\\Projects\\Bicep Repository\\bicep\\solutions\\hub-spoke\" --out \"C:\\Projects\\Bicep Repository\\bicep\\solutions\\output\" --formatter markdown --config \"C:\\Projects\\Bicep Repository\\bicep\\docsconfig.yml\"",
+      "workingDirectory": "C:\\Projects\\Bicep Repository\\bicep"
+    }
+  }
+}

@@ -20,7 +20,14 @@ public class BicepFileService : IBicepFileService
     {
         _fileSystem.Directory.CreateDirectory(folder);
         await _fileSystem.File.WriteAllTextAsync(path, content);
-        var compilation = await _compiler.CreateCompilation(PathResolver.FilePathToUri(path));
+        var compilation = await _compiler.CreateCompilation(PathResolver.FilePathToUri(path), skipRestore: false, forceRestore: true);
+        var sourceFile = compilation.GetEntrypointSemanticModel();
+        return sourceFile;
+    }
+
+    public async Task<SemanticModel> GetSemanticModelFromContent(Uri bicepUri)
+    {
+        var compilation = await _compiler.CreateCompilation(bicepUri, skipRestore: false);
         var sourceFile = compilation.GetEntrypointSemanticModel();
         return sourceFile;
     }

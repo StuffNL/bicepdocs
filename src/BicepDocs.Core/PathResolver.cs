@@ -47,7 +47,8 @@ public static class PathResolver
                           throw new ArgumentException("Failed to resolve OutputFolder", nameof(outputFolder)),
             OutputFileName: Path.ChangeExtension(fileName, "md"),
             InputFileName: fileName,
-            OutputPath: outputPathMd
+            OutputPath: outputPathMd,
+            BicepUri: FilePathToUri(bicepFilePath)
         );
     }
 

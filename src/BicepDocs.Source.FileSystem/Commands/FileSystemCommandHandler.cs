@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.CommandLine.Invocation;
 using System.Diagnostics.CodeAnalysis;
+using Bicep.Core.Workspaces;
 using LandingZones.Tools.BicepDocs.Core;
 using LandingZones.Tools.BicepDocs.Core.Abstractions;
 using LandingZones.Tools.BicepDocs.Core.Models.Destination;
@@ -87,9 +88,13 @@ public sealed class FileSystemCommandHandler : ICommandHandler
             _logger.LogInformation("Processing file {FileName}", paths.VirtualPath);
 
             var fileContent = await fileSystemSource.GetSourceContent(bicepFile);
+
             var sourceFile =
                 await _bicepFileService.GetSemanticModelFromContent(paths.VirtualFolder, paths.VirtualPath,
                     fileContent);
+
+            //var sourceFile =
+            //    await _bicepFileService.GetSemanticModelFromContent(paths.BicepUri);
 
             FormatterOptions? formatterOptions = null;
             if (!string.IsNullOrEmpty(Config))
