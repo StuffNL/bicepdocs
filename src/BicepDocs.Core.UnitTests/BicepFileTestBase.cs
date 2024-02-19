@@ -45,13 +45,9 @@ public abstract class BicepFileTestBase
         var compilation = await compiler.CreateCompilation(PathResolver.FilePathToUri(vPath));
         return compilation.GetEntrypointSemanticModel();
     }
-
-
-
-
+    
     protected async Task<SemanticModel> GetModel(params (string fileName, string fileContents)[] files)
     {
-
         var (uriDictionary, entryUri) = CreateFileDictionary(files.Select(file => ("/path/to", file.fileName, file.fileContents)).ToArray(), "main.bicep");
 
         var sourceFiles = uriDictionary
@@ -66,7 +62,7 @@ public abstract class BicepFileTestBase
 
     public static (IReadOnlyDictionary<Uri, string> files, Uri entryFileUri) CreateFileDictionary(IEnumerable<(string filePath, string fileName, string fileContents)> files, string entryFileName)
     {
-        var (entryFilePath, _, _) = files.Where(x => x.fileName == entryFileName).First();
+        var (entryFilePath, _, _) = files.First(x => x.fileName == entryFileName);
         var uriDictionary = files.ToDictionary(
             x => InMemoryFileResolver.GetFileUri($"{x.filePath}/{x.fileName}"),
             x => x.fileContents);

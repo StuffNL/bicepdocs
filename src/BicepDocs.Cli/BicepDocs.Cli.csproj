@@ -16,6 +16,8 @@
 		<PackageTags>bicep documentation azure arm</PackageTags>
 		<IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
 		<TrimMode>partial</TrimMode>
+		<PublishTrimmed>true</PublishTrimmed>
+		<JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
 	</PropertyGroup>
 
 	<ItemGroup>

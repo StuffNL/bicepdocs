@@ -2,6 +2,7 @@ using System.IO.Abstractions;
 using Bicep.Core;
 using Bicep.Core.Semantics;
 using LandingZones.Tools.BicepDocs.Core.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LandingZones.Tools.BicepDocs.Core.Services;
 
@@ -31,4 +32,5 @@ public class BicepFileService : IBicepFileService
         var sourceFile = compilation.GetEntrypointSemanticModel();
         return sourceFile;
     }
+
 }

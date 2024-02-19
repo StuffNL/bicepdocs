@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.CommandLine.Invocation;
 using System.Diagnostics.CodeAnalysis;
+using Bicep.Core.Semantics;
 using Bicep.Core.Workspaces;
 using LandingZones.Tools.BicepDocs.Core;
 using LandingZones.Tools.BicepDocs.Core.Abstractions;
@@ -55,7 +56,7 @@ public sealed class FileSystemCommandHandler : ICommandHandler
     {
         var inputPath = PathResolver.ResolvePath(FolderPath);
         var outputPath = PathResolver.ResolvePath(Out);
-        
+
         var formatProvider = _formatters.FirstOrDefault(x => x.Formatter == Formatter);
         if (formatProvider == null)
         {
@@ -87,15 +88,22 @@ public sealed class FileSystemCommandHandler : ICommandHandler
             var paths = PathResolver.ResolveModulePaths(bicepFile.Name, inputPath, outputPath);
             _logger.LogInformation("Processing file {FileName}", paths.VirtualPath);
 
-            var fileContent = await fileSystemSource.GetSourceContent(bicepFile);
+            //SemanticModel sourceFile;
 
-            var sourceFile =
-                await _bicepFileService.GetSemanticModelFromContent(paths.VirtualFolder, paths.VirtualPath,
-                    fileContent);
+            //if (inputPath.Contains("C:"))
+            //{
+            //    var fileContent = await fileSystemSource.GetSourceContent(bicepFile);
 
-            //var sourceFile =
-            //    await _bicepFileService.GetSemanticModelFromContent(paths.BicepUri);
-
+            //    sourceFile =
+            //        await _bicepFileService.GetSemanticModelFromContent(paths.VirtualFolder, paths.VirtualPath,
+            //            fileContent);
+            //}
+            //else
+            //{
+               var sourceFile =
+                    await _bicepFileService.GetSemanticModelFromContent(paths.BicepUri);
+            //}
+            
             FormatterOptions? formatterOptions = null;
             if (!string.IsNullOrEmpty(Config))
             {
