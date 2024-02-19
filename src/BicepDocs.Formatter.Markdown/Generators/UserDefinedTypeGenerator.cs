@@ -42,8 +42,9 @@ internal static class UserDefinedTypeGenerator
     {
         if (!context.FormatterOptions.IncludeOutputs) return;
         var types = UserDefinedTypeParser.ParseUserDefinedTypes(context.Template);
-        if (!types.Any()) return;
-        BuildUserDefinedTypes(document, types);
+        var importedUserDefinedTypes = ImportTypeParser.ParseImportTypes(context.Template);
+        if (!types.Any() && !importedUserDefinedTypes.Any()) return;
+        BuildUserDefinedTypes(document, types.AddRange(importedUserDefinedTypes));
     }
 
 

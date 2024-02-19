@@ -53,7 +53,8 @@ public static class ParameterParser
 
             if (symbol.DeclaringParameter.Type is VariableAccessSyntax || symbol.DeclaringParameter.Type is NullableTypeSyntax)
             {
-                parameter.IsUserDefinedType = model.Root.TypeDeclarations.Any(x => x.Name == typeName);
+                parameter.IsUserDefinedType = model.Root.TypeDeclarations.Any(x => x.Name == typeName)
+                                              || model.Root.ImportedTypes.Any(x => x.Name == typeName);
 
                 if (parameter.IsUserDefinedType)
                 {

@@ -27,6 +27,8 @@ public class MarkdownDocsFormatter : IDocsFormatter
         var metadata = MetadataParser.GetMetadata(context.Template, context.FormatterOptions.MetaKeyword);
         var parameters = ParameterParser.ParseParameters(context.Template);
         var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(context.Template);
+        var importedTypes = ImportTypeParser.ParseImportTypes(context.Template);
+
         var configuration =
             _configurationLoader.GetFormatterOptionsOrDefault<MarkdownOptions>(context.FormatterOptions, Formatter);
 
@@ -48,7 +50,7 @@ public class MarkdownDocsFormatter : IDocsFormatter
                         markdownDocument,
                         context.FormatterOptions,
                         parameters,
-                        userDefinedTypes,
+                        userDefinedTypes.AddRange(importedTypes),
                         configuration.Usage,
                         Path.ChangeExtension(context.Paths.RelativeInputPath, null),
                         metadata?.Version ?? "<version>");

@@ -106,12 +106,12 @@ type complexType = {
         Assert.AreEqual(2, userDefinedType.Properties.Count);
         Assert.IsFalse(userDefinedType.IsPrimitiveLiteral);
 
-        var simpleProperty = userDefinedType.Properties.First();
+        var simpleProperty = userDefinedType.Properties.First(x => x.Name == "simpleProperty");
         Assert.AreEqual("simpleProperty", simpleProperty.Name);
         Assert.AreEqual("string", simpleProperty.Type);
         Assert.IsTrue(simpleProperty.IsRequired);
 
-        var complexProperty = userDefinedType.Properties.Last();
+        var complexProperty = userDefinedType.Properties.First(x => x.Name == "complexProperty");
         Assert.AreEqual("complexProperty", complexProperty.Name);
         Assert.AreEqual("complexType", complexProperty.Type);
         Assert.IsTrue(complexProperty.IsRequired);
@@ -139,12 +139,12 @@ type complexType = {
         Assert.AreEqual(2, userDefinedType.Properties.Count);
         Assert.IsFalse(userDefinedType.IsPrimitiveLiteral);
 
-        var simpleProperty = userDefinedType.Properties.First();
+        var simpleProperty = userDefinedType.Properties.First(x => x.Name == "simpleProperty");
         Assert.AreEqual("simpleProperty", simpleProperty.Name);
         Assert.AreEqual("string", simpleProperty.Type);
         Assert.IsFalse(simpleProperty.IsRequired);
 
-        var complexProperty = userDefinedType.Properties.Last();
+        var complexProperty = userDefinedType.Properties.First(x => x.Name == "complexProperty");
         Assert.AreEqual("complexProperty", complexProperty.Name);
         Assert.AreEqual("complexType", complexProperty.Type);
         Assert.IsFalse(complexProperty.IsRequired);
@@ -205,19 +205,39 @@ type myStringLiteralType = 'single'
     {
         var semanticModel = await GetModel(
             ("main.bicep", """
-                           import {importType} from 'import.bicep'
+                           import {exportType} from 'import.bicep'
                            """),
             ("import.bicep", """
                           @export()
-                          type importType = {
-                            booleanType: bool
+                          @description('This is an exportType')
+                          type exportType = {
+                            //@description('This is a boolean type')
+                            //booleanProperty: bool
+                            //stringProperty: string?
+                            //literalType: 'dev' | 'prd'
+                            //@minValue(1)
+                            //@maxValue(10)
+                            //intType: int
+                            //@minLength(1)
+                            //@maxLength(5)
+                            //stringConstraint: string?
+                            @secure()
+                            secureString: string
+                            customTypeProperty: myIntLiteralType
+                          }
+                          
+                          type myIntLiteralType = {
+                            stringProp: string
                           }
                           """
         ));
 
-        var userDefinedTypes = UserDefinedTypeParser.ParseUserDefinedTypes(semanticModel);
-        var userDefinedType = userDefinedTypes.First(x => x.Name == "importType");
-        Assert.AreEqual("importType", userDefinedType.Name);
+        var userDefinedTypes = ImportTypeParser.ParseImportTypes(semanticModel);
+        var userDefinedType = userDefinedTypes.First(x => x.Name == "exportType");
+        Assert.AreEqual("exportType", userDefinedType.Name);
+
+        var customTypeProperty = userDefinedType.Properties.First(x => x.Name == "customTypeProperty");
+        Assert.AreEqual("myIntLiteralType", customTypeProperty.Type);
 
     }
 

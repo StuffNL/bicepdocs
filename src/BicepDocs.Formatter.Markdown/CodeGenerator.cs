@@ -27,11 +27,13 @@ public static class CodeGenerator
                 sb.AppendLine($"    {defaultParameter.Name}: {{");
 
                 var userDefinedType = userDefinedTypes.FirstOrDefault(x => x.Name == defaultParameter.Type);
-                foreach (var property in userDefinedType.Properties)
+                if (userDefinedType != null)
                 {
-                    sb.AppendLine($"        {property.Name}: {property.Name}");
+                    foreach (var property in userDefinedType.Properties)
+                    {
+                        sb.AppendLine($"        {property.Name}: {property.Name}");
+                    }
                 }
-
                 sb.AppendLine($"    }}");
             }
         }
@@ -39,7 +41,7 @@ public static class CodeGenerator
         var s = sb.ToString();
         var example = $@"module {moduleName} '{moduleType}/{moduleAlias}:{path}:{moduleVersion}' = {{
   name: '{moduleName}'
-  params: {{{s}}}
+  params: {{{s}  }}
 }}";
 
         return BicepFormatter.FormatBicepCode(example);
