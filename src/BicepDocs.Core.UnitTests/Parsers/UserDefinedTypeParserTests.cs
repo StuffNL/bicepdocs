@@ -201,7 +201,7 @@ type myStringLiteralType = 'single'
 
 
     [TestMethod]
-    public async Task Test_ImportType()
+    public async Task Test_ImportedTypesExplicit()
     {
         var semanticModel = await GetModel(
             ("main.bicep", """
@@ -211,16 +211,16 @@ type myStringLiteralType = 'single'
                           @export()
                           @description('This is an exportType')
                           type exportType = {
-                            //@description('This is a boolean type')
-                            //booleanProperty: bool
-                            //stringProperty: string?
-                            //literalType: 'dev' | 'prd'
-                            //@minValue(1)
-                            //@maxValue(10)
-                            //intType: int
-                            //@minLength(1)
-                            //@maxLength(5)
-                            //stringConstraint: string?
+                            @description('This is a boolean type')
+                            booleanProperty: bool
+                            stringProperty: string?
+                            literalType: 'dev' | 'prd'
+                            @minValue(1)
+                            @maxValue(10)
+                            intType: int
+                            @minLength(1)
+                            @maxLength(5)
+                            stringConstraint: string?
                             @secure()
                             secureString: string
                             customTypeProperty: myIntLiteralType
@@ -239,6 +239,20 @@ type myStringLiteralType = 'single'
         var customTypeProperty = userDefinedType.Properties.First(x => x.Name == "customTypeProperty");
         Assert.AreEqual("myIntLiteralType", customTypeProperty.Type);
 
-    }
+        var secureStringProperty = userDefinedType.Properties.First(x => x.Name == "secureString");
+        Assert.IsTrue(secureStringProperty.Secure);
 
+        var stringConstraintProperty = userDefinedType.Properties.First(x => x.Name == "stringConstraint");
+        Assert.IsFalse(stringConstraintProperty.IsRequired);
+        Assert.AreEqual(1, stringConstraintProperty.MinLength);
+        Assert.AreEqual(5, stringConstraintProperty.MaxLength);
+        Assert.AreEqual("string", stringConstraintProperty.Type);
+
+        var literalTypeProperty = userDefinedType.Properties.First(x => x.Name == "literalType");
+        Assert.AreEqual(2, literalTypeProperty.AllowedValues.Count);
+
+        var booleanProperty = userDefinedType.Properties.First(x => x.Name == "booleanProperty");
+        Assert.AreEqual("bool", booleanProperty.Type);
+
+    }
 }

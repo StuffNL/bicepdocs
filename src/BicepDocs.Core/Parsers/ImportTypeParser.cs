@@ -25,15 +25,18 @@ public static class ImportTypeParser
 
             userDefinedTypes.Add(userDefinedType);
 
-            var objectType = ((importedType.ExportMetadata.TypeReference as TypeType).Unwrapped as ObjectType);
-            var propertyTypes = PropertyParser.GetPropertyTypes(objectType);
-
-            var props = ((importedType.ExportMetadata.TypeReference as TypeType).Unwrapped as ObjectType).Properties;
-            userDefinedType.Properties = PropertyParser.ParseProperties(props, propertyTypes);
+            var objectType = (importedType.ExportMetadata.TypeReference as TypeType).Unwrapped as ObjectType;
+            if (objectType != null)
+            {
+                var propertyTypes = PropertyParser.GetPropertyTypes(objectType);
+                var props = objectType
+                    .Properties;
+                userDefinedType.Properties = PropertyParser.ParseProperties(props, propertyTypes);
+            }
 
         }
         return userDefinedTypes.ToImmutableList();
     }
 
-    
+
 }
